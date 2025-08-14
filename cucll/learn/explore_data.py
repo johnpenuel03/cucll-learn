@@ -26,6 +26,10 @@ def explore_data(df,
     Parameters:
     - df: Input DataFrame
     - outlier_threshold: Z-score for outlier detection (default: 3.0)
+    - iqr_k: Turkey's fences multiplier for IQR method (default: 1.5)
+    - outlier_iqr: Use IQR method for outlier detection (default: True)
+    - outlier_zscore: Use Z-score method for outlier detection (default: False)
+    - show_cm: Show correlation matrix (default: False)
     - show_hg: Show histogram/boxplot grid for numerical cols (default: False)
     - show_bp: Show boxplots for columns with outliers (default: False)
     - show_uc: Show value counts for categorical cols (default: False)
