@@ -1,4 +1,5 @@
 name: CU-CLL Learn Package Publish
+# This workflow builds and publishes the CU-CLL Learn package to PyPI
 
 on:
   push:
