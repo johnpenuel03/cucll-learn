@@ -16,6 +16,7 @@ def explore_data(df,
                       show_uc=False,      # Categorical Value Counts
                       show_skew=False,    # Skewness Analysis
                       show_const=False,   # Constant Value Check
+                      show_cm=False,       # Correlation Matrix
                       display_head=True, 
                       display_stats=True,
                       top_n_categories=5):
@@ -43,11 +44,11 @@ def explore_data(df,
     if not is_valid:
         print(msg)
         if isinstance(df, str):  # Only show tips for file paths
-            print("First load data with pd.read_csv() or pd.read_json()")
+            print(">>> First load data with pd.read_csv() or pd.read_json()")
         return
 
     if len(df) == 0:
-        print("Warning: DataFrame is empty!")
+        print(">>> Warning: DataFrame is empty!")
         return
     
     # ======================
@@ -56,10 +57,10 @@ def explore_data(df,
     print("="*50)
     print("BASIC INFORMATION")
     print("="*50)
-    print(f'Shape: {df.shape}\n')
-    print(f'Columns: {df.columns.tolist()}\n')
-    print(f'Data Types:\n{df.dtypes}\n')
-    print(f'Memory Usage: {df.memory_usage(deep=True).sum()/1024/1024:.2f} MB\n')
+    print(f'>>> Shape: {df.shape}\n')
+    print(f'>>> Columns: {df.columns.tolist()}\n')
+    print(f'>>> Data Types:\n{df.dtypes}\n')
+    print(f'>>> Memory Usage: {df.memory_usage(deep=True).sum()/1024/1024:.2f} MB\n')
     
     if display_head:
         print("First 5 rows:")
@@ -71,16 +72,16 @@ def explore_data(df,
     print("\n" + "="*50)
     print("DATA QUALITY CHECKS")
     print("="*50)
-    print(f'Missing Values:\n{df.isnull().sum()}\n')
-    print(f'Percentage Missing:\n{(df.isnull().mean()*100).round(2)}\n')
-    print(f'Duplicate Rows: {df.duplicated().sum()}\n')
+    print(f'>>> Missing Values:\n{df.isnull().sum()}\n')
+    print(f'>>> Percentage Missing:\n{(df.isnull().mean()*100).round(2)}\n')
+    print(f'>>> Duplicate Rows: {df.duplicated().sum()}\n')
     
     if show_const:
         constant_cols = [col for col in df.columns if df[col].nunique() == 1]
         if constant_cols:
-            print(f'Constant Columns: {constant_cols}\n')
+            print(f'>>> Constant Columns: {constant_cols}\n')
         else:
-            print('No constant value columns found\n')
+            print('>>> No constant value columns found\n')
     
     # ======================
     # Statistical Summary
@@ -108,18 +109,18 @@ def explore_data(df,
             iqr_outliers = detect_outliers_iqr(df, k=iqr_k)
             for col, count in iqr_outliers.items():
                 if count > 0:
-                    print(f'{col}: {count} outliers (IQR k={iqr_k})')
+                    print(f'>>> {col}: {count} outliers (IQR k={iqr_k})')
                 else:
-                    print(f'{col}: No outliers (IQR)')
+                    print(f'>>> {col}: No outliers (IQR)')
         
         if outlier_zscore:
             print("\n[Z-Score Method]")
             z_outliers = detect_outliers_zscore(df, threshold=outlier_threshold)
             for col, count in z_outliers.items():
                 if count > 0:
-                    print(f'{col}: {count} outliers (Z-score > {outlier_threshold})')
+                    print(f'>>> {col}: {count} outliers (Z-score > {outlier_threshold})')
                 else:
-                    print(f'{col}: No outliers (Z-score)')
+                    print(f'>>> {col}: No outliers (Z-score)')
         
         # Skewness Analysis
         if show_skew:
@@ -180,9 +181,9 @@ def explore_data(df,
         if show_uc:
             for col in categorical_cols:
                 vc = df[col].value_counts(dropna=False)
-                print(f'\n{col}:')
-                print(f'Unique values: {len(vc)}')
-                print('Top categories:')
+                print(f'>>> \n{col}:')
+                print(f'>>> Unique values: {len(vc)}')
+                print('>>> Top categories:')
                 print(vc.head(top_n_categories).to_string())
                 
                 if len(vc) <= 15:
@@ -207,22 +208,22 @@ def explore_data(df,
         unique_count = df[col].nunique(dropna=False)
         unique_values = df[col].unique()
         
-        print(f'\n{col}:')
-        print(f'Unique values: {unique_count}')
+        print(f'>>> \n{col}:')
+        print(f'>>> Unique values: {unique_count}')
         
         if unique_count <= 10:
             try:
                 # Try sorting if possible
-                print('All values:', np.sort([v for v in unique_values if pd.notna(v)]))
+                print('>>> All values:', np.sort([v for v in unique_values if pd.notna(v)]))
             except TypeError:
                 # Fallback to unsorted if mixed types
-                print('All values:', [v for v in unique_values if pd.notna(v)])
+                print('>>> All values:', [v for v in unique_values if pd.notna(v)])
         elif unique_count <= 20:
             samples = [v for v in unique_values if pd.notna(v)]
-            print('Sample values:', samples[:5])  # First 5 instead of random
+            print('>>> Sample values:', samples[:5])  # First 5 instead of random
         
         if pd.api.types.is_datetime64_any_dtype(df[col]):
-            print(f'Date range: {df[col].min().date()} to {df[col].max().date()}')
+            print(f'>>> Date range: {df[col].min().date()} to {df[col].max().date()}')
     
     # ======================
     # Correlation Analysis
@@ -236,7 +237,21 @@ def explore_data(df,
     if len(numerical_cols) > 1:
         print("\nCorrelation Matrix:")
         display(df[numerical_cols].corr())
+        if show_cm:             
+            plt.figure(figsize=(10, 8))
+            sns.heatmap(corr_matrix, 
+                        annot=True, 
+                        fmt=".2f", 
+                        cmap='coolwarm',
+                        center=0,
+                        linewidths=0.5,
+                        cbar_kws={"shrink": 0.8})
+            
+            plt.title("Correlation Heatmap", pad=20, fontsize=15)
+            plt.xticks(rotation=45, ha='right')
+            plt.tight_layout()
+            plt.show()
     elif len(numerical_cols) == 1:
-        print(f"\nOnly one numerical column found ({numerical_cols[0]}), cannot compute correlations")
+        print(f">>> \nOnly one numerical column found ({numerical_cols[0]}), cannot compute correlations")
     else:
-        print("\nNo numerical columns found for correlation analysis")
+        print(">>> \nNo numerical columns found for correlation analysis")

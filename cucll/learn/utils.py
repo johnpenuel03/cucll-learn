@@ -13,7 +13,7 @@ def validate_dataframe_input(df):
     """
     # Check: Must be a DataFrame
     if not isinstance(df, pd.DataFrame):
-        return False, "Input must be a pandas DataFrame"
+        return False, ">>> Input must be a pandas DataFrame"
     
     return True, ""
 
@@ -95,7 +95,7 @@ def handle_duplicates(df, keep='first', report=True):
     if not is_valid:
         print(msg)
         if isinstance(df, str):
-            print("First load data with pd.read_csv() or pd.read_json()")
+            print(">>> First load data with pd.read_csv() or pd.read_json()")
         return None
 
     initial_count = len(df)
@@ -103,9 +103,9 @@ def handle_duplicates(df, keep='first', report=True):
     removed = initial_count - len(cleaned_df)
     
     if report and removed > 0:
-        print(f"Removed {removed} duplicate rows (keeping '{keep}')")
+        print(f">>> Removed {removed} duplicate rows (keeping '{keep}')")
     elif report:
-        print("No duplicates found")
+        print(">>> No duplicates found")
         
     return cleaned_df
 
@@ -129,13 +129,13 @@ def handle_outliers(df, method='clip', threshold=3.0, report=True):
     if not is_valid:
         print(msg)
         if isinstance(df, str):
-            print("First load data with pd.read_csv() or pd.read_json()")
+            print(">>> First load data with pd.read_csv() or pd.read_json()")
         return None
 
     numerical_cols = df.select_dtypes(include=[np.number]).columns
 
     if len(numerical_cols) == 0:
-        if report: print("No numerical columns - skipping outliers")
+        if report: print(">>> No numerical columns - skipping outliers")
         return df.copy()
 
     cleaned_df = df.copy()
@@ -153,11 +153,11 @@ def handle_outliers(df, method='clip', threshold=3.0, report=True):
             lower = col_data.mean() - threshold * col_data.std()
             cleaned_df[col] = cleaned_df[col].clip(lower, upper)
             if report and mask.any():
-                print(f"Clipped {mask.sum()} outliers in {col}")
+                print(f">>> Clipped {mask.sum()} outliers in {col}")
         elif method == 'remove':
             cleaned_df = cleaned_df[~cleaned_df[col].isin(col_data[mask])]
             if report and mask.any():
-                print(f"Removed {mask.sum()} outliers from {col}")
+                print(f">>> Removed {mask.sum()} outliers from {col}")
     
     return cleaned_df
 
@@ -181,7 +181,7 @@ def handle_missing(df, num_method='mean', cat_method='mode', report=True):
     if not is_valid:
         print(msg)
         if isinstance(df, str):
-            print("First load data with pd.read_csv() or pd.read_json()")
+            print(">>> First load data with pd.read_csv() or pd.read_json()")
         return None
 
 
@@ -199,12 +199,12 @@ def handle_missing(df, num_method='mean', cat_method='mode', report=True):
             elif num_method == 'drop':
                 cleaned_df = cleaned_df.dropna(subset=[col])
                 if report:
-                    print(f"Dropped missing values from {col}")
+                    print(f">>> Dropped missing values from {col}")
                 continue
                 
             cleaned_df[col] = cleaned_df[col].fillna(fill_val)
             if report:
-                print(f"Filled {col} missing values with {num_method}: {fill_val:.2f}")
+                print(f">>> Filled {col} missing values with {num_method}: {fill_val:.2f}")
     
     # Categorical columns
     for col in cat_cols:
@@ -213,10 +213,10 @@ def handle_missing(df, num_method='mean', cat_method='mode', report=True):
                 fill_val = cleaned_df[col].mode()[0]
                 cleaned_df[col] = cleaned_df[col].fillna(fill_val)
                 if report:
-                    print(f"Filled {col} missing values with mode: {fill_val}")
+                    print(f">>> Filled {col} missing values with mode: {fill_val}")
             elif cat_method == 'drop':
                 cleaned_df = cleaned_df.dropna(subset=[col])
                 if report:
-                    print(f"Dropped missing values from {col}")
+                    print(f">>> Dropped missing values from {col}")
     
     return cleaned_df

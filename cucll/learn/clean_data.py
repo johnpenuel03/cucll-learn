@@ -27,15 +27,15 @@ def clean_data(df,
     if not is_valid:
         print(msg)
         if isinstance(df, str):
-            print("First load data with pd.read_csv() or pd.read_json()")
+            print(">>> First load data with pd.read_csv() or pd.read_json()")
         return None
 
         
     if len(df) == 0:
-        print("Empty DataFrame - nothing to clean")
+        print(">>> Empty DataFrame - nothing to clean")
         return df  # Return as-is
 
-    if report: print("Starting data cleaning pipeline...")
+    if report: print(">>> Starting data cleaning pipeline...")
     
     # Set default params
     defaults = {
@@ -51,9 +51,9 @@ def clean_data(df,
     if df.select_dtypes(include=np.number).columns.any():
         df = handle_outliers(df, **defaults['outlier'] | outlier_params)
     elif report:
-        print("Skipping outlier detection - no numerical columns found")
+        print(">>> Skipping outlier detection - no numerical columns found")
 
     df = handle_missing(df, **defaults['missing'] | missing_params)
     
-    if report: print("Cleaning complete!")
+    if report: print(">>> Cleaning complete!")
     return df
