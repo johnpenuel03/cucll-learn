@@ -185,7 +185,7 @@ def explore_data(df,
         if show_uc:
             for col in categorical_cols:
                 vc = df[col].value_counts(dropna=False)
-                print(f'>>> \n{col}:')
+                print(f'\n{col}:')
                 print(f'>>> Unique values: {len(vc)}')
                 print('>>> Top categories:')
                 print(vc.head(top_n_categories).to_string())
@@ -197,9 +197,9 @@ def explore_data(df,
                     plt.title(f'{col} Distribution')
                     plt.show()
         else:
-            print("(Enable show_uc=True for categorical value counts)")
+            print(">>> (Enable show_uc=True for categorical value counts)")
     else:
-        print("\nNo categorical columns found")
+        print("\n>>> No categorical columns found")
     
     # ======================
     # Unique Value Analysis
@@ -212,7 +212,7 @@ def explore_data(df,
         unique_count = df[col].nunique(dropna=False)
         unique_values = df[col].unique()
         
-        print(f'>>> \n{col}:')
+        print(f'\n{col}:')
         print(f'>>> Unique values: {unique_count}')
         
         if unique_count <= 10:
@@ -240,7 +240,9 @@ def explore_data(df,
 
     if len(numerical_cols) > 1:
         print("\nCorrelation Matrix:")
-        display(df[numerical_cols].corr())
+        corr_matrix = df[numerical_cols].corr()
+        display(corr_matrix)
+
         if show_cm:             
             plt.figure(figsize=(10, 8))
             sns.heatmap(corr_matrix, 
@@ -256,6 +258,6 @@ def explore_data(df,
             plt.tight_layout()
             plt.show()
     elif len(numerical_cols) == 1:
-        print(f">>> \nOnly one numerical column found ({numerical_cols[0]}), cannot compute correlations")
+        print(f"\n>>> Only one numerical column found ({numerical_cols[0]}), cannot compute correlations")
     else:
-        print(">>> \nNo numerical columns found for correlation analysis")
+        print("\n>>> No numerical columns found for correlation analysis")
