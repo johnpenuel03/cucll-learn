@@ -111,7 +111,7 @@ def handle_duplicates(df, keep='first', report=True):
 
 
 def handle_outliers(df, method='clip', use_zscore=False, threshold=3.0, iqr_k=1.5, report=True):
-   """
+    """
     Handle outliers in numerical columns using IQR (default) or Z-score
     
     Parameters:
