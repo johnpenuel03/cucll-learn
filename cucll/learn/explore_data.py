@@ -67,7 +67,7 @@ def explore_data(df,
     print(f'>>> Memory Usage: {df.memory_usage(deep=True).sum()/1024/1024:.2f} MB\n')
     
     if display_head:
-        print("First 5 rows:")
+        print(">>> First 5 rows:")
         display(df.head())
     
     # ======================
@@ -239,7 +239,7 @@ def explore_data(df,
     numerical_cols = df.select_dtypes(include=[np.number]).columns
 
     if len(numerical_cols) > 1:
-        print("\nCorrelation Matrix:")
+        print("\n>>> Correlation Matrix:")
         corr_matrix = df[numerical_cols].corr()
         display(corr_matrix)
 

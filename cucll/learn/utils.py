@@ -110,15 +110,16 @@ def handle_duplicates(df, keep='first', report=True):
     return cleaned_df
 
 
-def handle_outliers(df, method='clip', threshold=3.0, report=True):
-    """
-    Handle outliers in numerical columns
+def handle_outliers(df, method='clip', use_zscore=False, threshold=3.0, iqr_k=1.5, report=True):
+   """
+    Handle outliers in numerical columns using IQR (default) or Z-score
     
     Parameters:
-    - df: Input DataFrame
-    - method: 'clip' (cap values) or 'remove' (drop rows)
-    - threshold: Z-score threshold (default 3.0)
-    - report: Print summary of changes
+    - method: 'clip' (default) or 'remove'
+    - use_zscore: If False (default), uses IQR method
+    - threshold: Only if use_zscore=True (default 3.0)
+    - iqr_k: IQR multiplier (default 1.5)
+    - report: Print summary
     
     Returns:
     - Cleaned DataFrame
@@ -144,20 +145,36 @@ def handle_outliers(df, method='clip', threshold=3.0, report=True):
         col_data = cleaned_df[col].dropna()
         if len(col_data) < 2:
             continue
-            
-        z_scores = np.abs(stats.zscore(col_data))
-        mask = z_scores > threshold
+
+        if use_zscore:
+            # Z-score method
+            mean = col_data.mean()
+            std = col_data.std()
+            lower = mean - threshold * std
+            upper = mean + threshold * std
+            method_name = f"Z-score > {threshold}"
+        else:
+            # IQR method (default)
+            q1 = col_data.quantile(0.25)
+            q3 = col_data.quantile(0.75)
+            iqr = q3 - q1
+            lower = q1 - iqr_k * iqr
+            upper = q3 + iqr_k * iqr
+            method_name = f"IQR k={iqr_k}"
+        
+        # Apply clipping/removal
+        outliers_mask = (col_data < lower) | (col_data > upper)
+        n_outliers = outliers_mask.sum()
         
         if method == 'clip':
-            upper = col_data.mean() + threshold * col_data.std()
-            lower = col_data.mean() - threshold * col_data.std()
             cleaned_df[col] = cleaned_df[col].clip(lower, upper)
-            if report and mask.any():
-                print(f">>> Clipped {mask.sum()} outliers in {col}")
+            if report and n_outliers > 0:
+                print(f">>> Clipped {n_outliers} outliers in {col} ({method_name})")    
         elif method == 'remove':
-            cleaned_df = cleaned_df[~cleaned_df[col].isin(col_data[mask])]
-            if report and mask.any():
-                print(f">>> Removed {mask.sum()} outliers from {col}")
+            cleaned_df = cleaned_df[~outliers_mask]
+            if report and n_outliers > 0:
+                print(f">>> Removed {n_outliers} outliers from {col} ({method_name})")
+
     
     return cleaned_df
 
